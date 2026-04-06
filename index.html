@@ -4,10 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LowCode FX | Enterprise Solutions</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
 
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; cursor: none; }
+        /* DISALLOW TEXT SELECTION */
+        * { 
+            margin:0; 
+            padding:0; 
+            box-sizing:border-box; 
+            cursor: none; 
+            -webkit-user-select: none; 
+            -ms-user-select: none; 
+            user-select: none; 
+        }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -50,7 +59,7 @@
             background: radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.15), transparent 60%);
         }
 
-        /* 3. LOGO (Restored Wide Scaling) */
+        /* 3. LOGO */
         .logo-container {
             position: fixed;
             left: clamp(50px, 10vw, 150px);
@@ -161,15 +170,15 @@
             transform: translateY(-2px);
         }
 
-        /* 7. NEW EMAIL STYLE (Changed completely) */
+        /* 7. EMAIL STYLE */
         .email-link {
-            font-family: JetBrains Mono', monospace; /* Clean tech font */
-            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            font-family: 'Space Grotesk', sans-serif; 
+            font-size: clamp(1rem, 2vw, 1.8rem);
             color: #ffffff;
             text-decoration: none;
             letter-spacing: 0.05em;
             font-weight: 600;
-            text-transform: lowercase; /* Professional lowercase look */
+            text-transform: lowercase; 
             position: relative;
             display: inline-block;
             transition: color 0.3s ease;
@@ -183,19 +192,14 @@
             bottom: -2px;
             left: 0;
             background: #f472b6;
-            transform: scaleX(0.3); /* Small center line default */
+            transform: scaleX(0.3);
             transform-origin: center;
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             box-shadow: 0 0 8px #f472b6;
         }
 
-        .email-link:hover { 
-            color: #f472b6; 
-        }
-        
-        .email-link:hover::after {
-            transform: scaleX(1); /* Expands on hover */
-        }
+        .email-link:hover { color: #f472b6; }
+        .email-link:hover::after { transform: scaleX(1); }
 
     </style>
 </head>
@@ -218,7 +222,7 @@
             <h1>About Us</h1>
             <h2>Enterprise Logic</h2>
             <p>LowCode FX maximizes Power Platform potential. We build high-performance logic frameworks that transform standard apps into enterprise-grade software.</p>
-            <Br><a href="https://www.youtube.com/@LowCodeFX" target="_blank" class="action-btn">Explore Channel</a>
+            <br><a href="https://www.youtube.com/@LowCodeFX" target="_blank" class="action-btn">Explore Channel</a>
         </div></div>
 
         <div class="panel"><div class="content">
@@ -254,6 +258,18 @@
 </div>
 
 <script>
+    // --- SECURITY SCRIPT: PROTECT CODE ---
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    document.onkeydown = function(e) {
+        if(e.keyCode == 123) return false; // F12
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
+        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+    };
+
+    // --- ORIGINAL SITE LOGIC ---
     const panels = document.querySelectorAll('.panel');
     const container = document.getElementById('scroll-container');
     const curveNav = document.getElementById('curveNav');
