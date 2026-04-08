@@ -4,375 +4,294 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LowCode FX</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
     <style>
-        /* DISALLOW TEXT SELECTION */
+        /* --- RESET & CORE --- */
         * { 
-            margin:0; 
-            padding:0; 
-            box-sizing:border-box; 
-            cursor: none; 
-            -webkit-user-select: none; 
-            -ms-user-select: none; 
-            user-select: none; 
+            margin:0; padding:0; box-sizing:border-box; 
+            cursor: none; -webkit-user-select: none; user-select: none; 
         }
-
         body {
             font-family: 'Inter', sans-serif;
-            background: #010103;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(69, 20, 71, 0.5) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(69, 20, 71, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at center, #16162d 0%, #0b0b1a 100%); 
             color: #f8fafc;
-            overflow-x: hidden;
-            scrollbar-width: none;
-            line-height: 1.8;
+            overflow-x: hidden; scrollbar-width: none; line-height: 1.6;
+            background-color: #0b0b1a;
         }
         body::-webkit-scrollbar { display: none; }
 
-        /* 1. CURSOR */
+        /* --- ATMOSPHERE --- */
+        #starfield { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
         #custom-cursor, #cursor-follower {
-            position: fixed;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
+            position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);
         }
-        #custom-cursor {
-            width: 6px; height: 6px; background: #fff; border-radius: 50%;
-            box-shadow: 0 0 15px #fff, 0 0 30px rgba(244, 114, 182, 1);
+        #custom-cursor { width: 6px; height: 6px; background: #fff; border-radius: 50%; box-shadow: 0 0 15px #fff; }
+        #cursor-follower { 
+            width: 40px; height: 40px; border: 1px solid rgba(255, 255, 255, 0.3); 
+            border-radius: 50%; transition: width 0.4s ease, height 0.4s ease, background 0.4s ease, border 0.4s ease; 
         }
-        #cursor-follower {
-            width: 42px; height: 42px; border: 1px solid rgba(244, 114, 182, 0.4);
-            background: radial-gradient(circle, rgba(244, 114, 182, 0.1) 0%, transparent 70%);
-            border-radius: 50%;
+
+        /* --- LOGO --- */
+        .logo-container {
+            position: fixed; z-index: 1000; pointer-events: none;
+            left: 50%; top: 50%; transform: translate(-50%, -50%);
         }
+        .logo { height: 100%; filter: drop-shadow(0 0 40px rgba(69, 20, 71, 0.7)); }
+
+        /* --- NAVIGATION --- */
+        .curve-nav { position: fixed; inset: 0; z-index: 1200; pointer-events: none; }
+        .curve-nav button {
+            position: absolute; pointer-events: auto; background: transparent; border: none;
+            color: rgba(255, 255, 255, 0.4); font-family: 'Orbitron'; font-size: 10px;
+            letter-spacing: 2px; text-transform: uppercase; transition: color 0.4s, text-shadow 0.4s;
+            white-space: nowrap;
+        }
+        .curve-nav button.active { color: #fff; text-shadow: 0 0 15px #451447; font-weight: 700; }
+
+        /* --- PANELS --- */
+        .scroll-container { height: 400vh; }
+        .viewport { position: sticky; top: 0; height: 100vh; overflow: hidden; }
+        .panel { position: absolute; width: clamp(320px, 85%, 550px); z-index: 5; pointer-events: none; transform-origin: center; }
+        .content { opacity: 0; transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .panel.active .content { opacity: 1; pointer-events: auto; }
+        
+        h1 { 
+            font-family: 'Orbitron'; 
+            font-size: clamp(2.2rem, 5vw, 3.8rem); 
+            margin-bottom: 0.5rem; 
+            color: #fff; 
+            text-shadow: 0 0 20px rgba(69, 20, 71, 0.8);
+        }
+        h2 { 
+            font-family: 'Orbitron'; 
+            font-size: 0.85rem; 
+            color: #fff; 
+            letter-spacing: 4px; 
+            margin-bottom: 1.2rem;
+            text-shadow: 0 0 10px rgba(69, 20, 71, 0.5);
+            opacity: 0.9;
+        }
+        
+        /* --- INTERACTABLES --- */
+        .action-btn {
+            position: relative; display: inline-block; padding: 14px 28px; 
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(69, 20, 71, 0.5);
+            color: #fff; font-family: 'Orbitron'; font-size: 10px; text-decoration: none;
+            margin-top: 15px; text-transform: uppercase; letter-spacing: 2px;
+            overflow: hidden; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); z-index: 1;
+        }
+        .action-btn::before {
+            content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+            background: #451447; border-radius: 50%; transform: translate(-50%, -50%);
+            transition: width 0.6s ease-out, height 0.6s ease-out; z-index: -1;
+        }
+        .action-btn:hover::before { width: 350px; height: 350px; }
+        .action-btn:hover { border-color: #fff; box-shadow: 0 0 30px rgba(69, 20, 71, 0.9); transform: translateY(-3px); }
+
+        .product-item { 
+            padding: 1.8rem; border-left: 3px solid #451447; 
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(8px);
+            transition: all 0.3s ease; margin-top: 25px;
+        }
+        .product-item:hover { background: rgba(69, 20, 71, 0.25); border-left-color: #fff; transform: translateX(10px); }
 
         @media (max-width: 768px) {
             * { cursor: auto !important; }
             #custom-cursor, #cursor-follower { display: none; }
         }
-
-        /* 2. ATMOSPHERE */
-        #starfield {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            background: radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.15), transparent 60%);
-        }
-
-        /* 3. LOGO */
-        .logo-container {
-            position: fixed;
-            left: clamp(50px, 10vw, 150px);
-            top: 50%;
-            transform: translateY(-50%);
-            height: clamp(180px, 55vh, 650px); 
-            z-index: 1000;
-            pointer-events: none;
-        }
-
-        .logo { 
-            height: 100%; 
-            filter: drop-shadow(0 0 40px rgba(244, 114, 182, 0.35));
-        }
-
-        @media (max-width: 768px) {
-            .logo-container {
-                left: 50%; top: 15%;
-                transform: translate(-50%, -50%);
-                height: 22vh;
-            }
-        }
-
-        /* 4. NAVIGATION TABS */
-        .curve-nav { position: fixed; inset: 0; z-index: 1200; pointer-events: none; }
-        .curve-nav button {
-            position: absolute;
-            pointer-events: auto;
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.3);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            font-weight: 400;
-            letter-spacing: 2px;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            transform: translate(-50%, -50%);
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-        .curve-nav button.active { 
-            color: #f472b6; 
-            font-weight: 700; 
-            text-shadow: 0 0 20px rgba(244, 114, 182, 0.6);
-            transform: translate(-50%, -50%) scale(1.2);
-            letter-spacing: 4px;
-        }
-
-        @media (max-width: 768px) {
-            .curve-nav {
-                top: 28%; height: 50px;
-                display: flex; justify-content: center; gap: 25px;
-            }
-            .curve-nav button { position: relative !important; left: auto !important; top: auto !important; transform: none !important; }
-        }
-
-        /* 5. CONTENT PANELS */
-        .scroll-container { height: 400vh; }
-        .viewport { position: sticky; top: 0; height: 100vh; overflow: hidden; }
-
-        .panel { 
-            position: absolute; 
-            top: 50%; left: 50%; 
-            width: clamp(320px, 40vw, 600px);
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .content {
-            opacity: 0; transform: translateX(40px);
-            transition: all 0.9s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .panel.active .content { opacity: 1; transform: translateX(0); pointer-events: auto; }
-
-        .panel h1 { 
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(2.2rem, 5vw, 4rem); 
-            background: linear-gradient(to right, #ffffff, #f472b6);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            margin-bottom: 0.7rem;
-        }
-
-        .panel h2 { font-family: 'Orbitron'; font-size: 0.9rem; color: #a78bfa; letter-spacing: 4px; margin-bottom: 1.5rem; }
-
-        /* 6. UNIFIED BUTTON STYLE */
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .product-item { padding: 1.5rem; border-left: 1px solid #f472b6; background: rgba(255, 255, 255, 0.02); }
-        
-        .action-btn {
-            display: inline-block; 
-            padding: 12px 30px; 
-            border: 1px solid #f472b6;
-            color: #f472b6; 
-            font-family: 'Orbitron', sans-serif;
-            font-size: 10px;
-            font-weight: 700;
-            text-decoration: none;
-            text-transform: uppercase; 
-            letter-spacing: 2px;
-            transition: 0.4s;
-            background: rgba(244, 114, 182, 0.05);
-            text-align: center;
-        }
-        .action-btn:hover { 
-            background: #f472b6; 
-            color: #000; 
-            box-shadow: 0 0 25px rgba(244, 114, 182, 0.5);
-            transform: translateY(-2px);
-        }
-
-        /* 7. EMAIL STYLE */
-        .email-link {
-            font-family: 'Space Grotesk', sans-serif; 
-            font-size: clamp(1rem, 2vw, 1.8rem);
-            color: #ffffff;
-            text-decoration: none;
-            letter-spacing: 0.05em;
-            font-weight: 600;
-            text-transform: lowercase; 
-            position: relative;
-            display: inline-block;
-            transition: color 0.3s ease;
-        }
-        
-        .email-link::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 1px;
-            bottom: -2px;
-            left: 0;
-            background: #f472b6;
-            transform: scaleX(0.3);
-            transform-origin: center;
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 0 8px #f472b6;
-        }
-
-        .email-link:hover { color: #f472b6; }
-        .email-link:hover::after { transform: scaleX(1); }
-
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;"> 
 
 <div id="custom-cursor"></div>
 <div id="cursor-follower"></div>
 <canvas id="starfield"></canvas>
 
-<div class="logo-container">
-    <img src="cropped_circle_image (1).png" class="logo" id="mainLogo" />
+<div class="logo-container" id="logoBox">
+    <img src="cropped_circle_image (1).png" class="logo" />
 </div>
 
-<div class="curve-nav" id="curveNav"></div>
+<nav class="curve-nav" id="curveNav"></nav>
 
 <div class="scroll-container" id="scroll-container">
     <div class="viewport">
-        
         <div class="panel"><div class="content">
             <h1>About Us</h1>
             <h2>Enterprise Logic</h2>
-            <p>LowCode FX maximizes Power Platform potential. We build high-performance logic frameworks that transform standard apps into enterprise-grade software.</p>
-            <br><a href="https://www.youtube.com/@LowCodeFX" target="_blank" class="action-btn">Explore Channel</a>
+            <p>LowCode FX maximizes Power Platform potential with high-performance logic frameworks that turn apps into enterprise software.</p>
+            <a href="#" class="action-btn">Explore Channel</a>
         </div></div>
 
         <div class="panel"><div class="content">
             <h1>Products</h1>
             <h2>Our Stack</h2>
-            <div class="product-grid">
-                <div class="product-item">
-                    <h3 style="font-family:'Orbitron'; font-size: 0.9rem; margin-bottom:10px;">To Do App</h3>
-                    <p style="font-size: 0.8rem; margin-bottom:20px;">Proprietary logic engine for advanced task management.</p>
-                    <a href="#" class="action-btn">Buy</a>
-                </div>
-                <div class="product-item">
-                    <h3 style="font-family:'Orbitron'; font-size: 0.9rem; margin-bottom:10px;">Logic Kit</h3>
-                    <p style="font-size: 0.8rem; margin-bottom:20px;">50+ pre-built complex formulas for canvas apps.</p>
-                    <a href="#" class="action-btn">Buy</a>
-                </div>
+            <div class="product-item">
+                <h3>To Do App</h3>
+                <p style="font-size: 11px; color:#cbd5e1">Full-stack enterprise task management framework.</p>
+                <span style="display: block; font-size: 10px; color: #fff; margin-top: 12px; font-weight: 700; letter-spacing: 1px; opacity: 0.8;">AVAILABLE SOON</span>
             </div>
         </div></div>
 
         <div class="panel"><div class="content">
             <h1>Contact</h1>
             <h2>Partnerships</h2>
-            <p>Ready to accelerate your build? Connect with us for enterprise architecture audits or custom builds.</p>
-            <div style="margin-top: 1rem;">
-                <p style="margin-bottom: 2.5rem;">
-                    <a href="mailto:info@lowcodefx.in" class="email-link">info@lowcodefx.in</a>
-                </p>
-                <a href="https://www.youtube.com/@LowCodeFX" target="_blank" class="action-btn">YouTube Channel</a>
-            </div>
+            <p>Ready to build? Connect for enterprise architecture audits or custom builds.</p>
+            <a href="mailto:lowcodefx@gmail.com" style="color:#fff; font-weight:400; font-size:1.3rem; display:block; margin: 20px 0; text-decoration:none; letter-spacing: 1px;">lowcodefx@gmail.com</a>
+            <a href="#" class="action-btn">YouTube Channel</a>
         </div></div>
-
     </div>
 </div>
 
 <script>
-    // --- SECURITY SCRIPT: PROTECT CODE ---
-    document.addEventListener('contextmenu', event => event.preventDefault());
-
-    document.onkeydown = function(e) {
-        if(e.keyCode == 123) return false; // F12
-        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-        if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
-        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
-    };
-
-    // --- ORIGINAL SITE LOGIC ---
     const panels = document.querySelectorAll('.panel');
     const container = document.getElementById('scroll-container');
-    const curveNav = document.getElementById('curveNav');
+    const nav = document.getElementById('curveNav');
     const cursor = document.getElementById('custom-cursor');
     const follower = document.getElementById('cursor-follower');
+    const logoBox = document.getElementById('logoBox');
+    
+    let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0, followerX = 0, followerY = 0, currentScroll = 0;
 
-    let currentScroll = 0, targetScroll = 0;
-    const scrollEase = 0.1; 
-
-    let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0, followX = 0, followY = 0;
-    window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
-
-    const canvas = document.getElementById('starfield');
-    const ctx = canvas.getContext('2d');
-    let stars = [];
-    function initStars() {
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        stars = Array.from({length: 220}, () => ({
-            x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-            size: Math.random() * 1.5, speed: 0.001 + Math.random() * 0.002
-        }));
-    }
+    window.addEventListener('mousemove', e => { 
+        mouseX = e.clientX; mouseY = e.clientY; 
+        const isHovering = e.target.closest('button, a, .product-item');
+        if(isHovering && follower) {
+            follower.style.width = '70px'; follower.style.height = '70px';
+            follower.style.borderColor = '#fff'; follower.style.background = 'rgba(69, 20, 71, 0.4)';
+        } else if (follower) {
+            follower.style.width = '40px'; follower.style.height = '40px';
+            follower.style.borderColor = 'rgba(255, 255, 255, 0.3)'; follower.style.background = 'transparent';
+        }
+    });
 
     const labels = ["About", "Products", "Contact"];
     labels.forEach((label, i) => {
         const btn = document.createElement('button');
         btn.innerText = label;
-        btn.onclick = () => {
-            const scrollPos = (i / (labels.length - 1)) * (container.offsetHeight - window.innerHeight);
-            window.scrollTo({ top: scrollPos, behavior: 'smooth' });
-        };
-        curveNav.appendChild(btn);
+        btn.onclick = () => window.scrollTo({ top: (i/(labels.length-1)) * (container.offsetHeight - window.innerHeight), behavior: 'smooth' });
+        nav.appendChild(btn);
     });
-    const navButtons = document.querySelectorAll('.curve-nav button');
+    const navBtns = nav.querySelectorAll('button');
+
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let stars = [], clouds = [];
+
+    function initStars() {
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        stars = Array.from({length: 250}, () => ({
+            x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+            size: Math.random() * 1.5, speedX: (Math.random() - 0.5) * 0.03, 
+            speedY: (Math.random() - 0.5) * 0.03, opacity: 0.3 + Math.random() * 0.5,
+            twinkleSpeed: 0.0004 + Math.random() * 0.0008 
+        }));
+        clouds = Array.from({length: 12}, () => ({
+            x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+            radius: (Math.random() * 600) + 300, color: Math.random() > 0.5 ? 'rgba(69, 20, 71,' : 'rgba(30, 30, 60,',
+            pulse: Math.random() * Math.PI, speed: 0.0005 + Math.random() * 0.001 
+        }));
+    }
+
+    function drawStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = 'screen';
+        clouds.forEach(cloud => {
+            cloud.pulse += cloud.speed;
+            const opacity = 0.06 + Math.sin(cloud.pulse) * 0.03;
+            const grad = ctx.createRadialGradient(cloud.x, cloud.y, 0, cloud.x, cloud.y, cloud.radius);
+            grad.addColorStop(0, `${cloud.color} ${opacity})`);
+            grad.addColorStop(1, `${cloud.color} 0)`);
+            ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2); ctx.fill();
+        });
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = "#fff";
+        stars.forEach(s => {
+            s.x += s.speedX; s.y += s.speedY;
+            if (s.x < 0) s.x = canvas.width; if (s.x > canvas.width) s.x = 0;
+            const twinkle = (Math.sin(Date.now() * s.twinkleSpeed) + 1) / 2;
+            ctx.globalAlpha = s.opacity + (twinkle * 0.1);
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2); ctx.fill();
+        });
+        requestAnimationFrame(drawStars);
+    }
 
     function animate() {
-        cursorX += (mouseX - cursorX) * 0.2;
-        cursorY += (mouseY - cursorY) * 0.2;
-        followX += (mouseX - followX) * 0.12;
-        followY += (mouseY - followY) * 0.12;
-        cursor.style.left = `${cursorX}px`; cursor.style.top = `${cursorY}px`;
-        follower.style.transform = `translate(${followX}px, ${followY}px)`;
+        cursorX += (mouseX - cursorX) * 0.15; cursorY += (mouseY - cursorY) * 0.15;
+        followerX += (mouseX - followerX) * 0.08; followerY += (mouseY - followerY) * 0.08;
+        if(cursor) {
+            cursor.style.left = `${cursorX}px`; cursor.style.top = `${cursorY}px`;
+            follower.style.left = `${followerX}px`; follower.style.top = `${followerY}px`;
+        }
 
-        targetScroll = window.scrollY;
-        currentScroll += (targetScroll - currentScroll) * scrollEase;
+        currentScroll += (window.scrollY - currentScroll) * 0.1;
         const progress = currentScroll / (container.offsetHeight - window.innerHeight);
-
         const winW = window.innerWidth;
-        const isMobile = winW <= 768;
-        const logoEl = document.querySelector('.logo-container');
-        const logoBox = logoEl.getBoundingClientRect();
-        
-        const centerX = isMobile ? winW / 2 : logoBox.left + (logoBox.width / 2);
-        const centerY = isMobile ? window.innerHeight * 0.55 : window.innerHeight / 2;
+        const winH = window.innerHeight;
+
+        const t = Math.min(Math.max((winW - 500) / 1000, 0), 1);
+
+        // --- BIG LOGO LOGIC ---
+        // Wide: 22% from left, 55vh height | Mobile: Center, 25vh height
+        const logoX = t * (winW * 0.22) + (1 - t) * (winW * 0.5);
+        const logoY = t * (winH * 0.5) + (1 - t) * (winH * 0.2);
+        const logoSize = t * 55 + (1 - t) * 25; 
+
+        logoBox.style.left = `${logoX}px`;
+        logoBox.style.top = `${logoY}px`;
+        logoBox.style.height = `${logoSize}vh`;
+
+        const mobileSpacing = winW < 400 ? 100 : 130; 
+        const tabSpacing = t * 0 + (1 - t) * mobileSpacing;
+        const totalTabsWidth = (labels.length - 1) * tabSpacing;
 
         panels.forEach((panel, i) => {
             const normalizedIdx = i / (labels.length - 1);
-            const angleOffset = (normalizedIdx - progress) * (isMobile ? Math.PI * 0.35 : Math.PI * 0.6);
+            const dist = Math.abs(normalizedIdx - progress);
+            
+            const arcIntensity = (1 - Math.abs(t - 0.5) * 2) * 180; 
+            const panelLeft = t * 75 + (1 - t) * 50; 
+            const panelTop = (t * (winH/2 + (normalizedIdx - progress) * winH * 0.85)) + (1 - t) * (winH * 0.65) + arcIntensity;
+            
+            panel.style.left = `${panelLeft}%`;
+            panel.style.top = `${panelTop}px`;
+            panel.style.transform = `translate(-50%, -50%) scale(${1 - dist * 0.35})`;
 
-            let dynamicRadius = winW * 0.45; 
-            if (winW < 1400) dynamicRadius = winW * 0.52;
-            if (winW < 1000) dynamicRadius = winW * 0.62;
+            const sweep = Math.PI * 0.35;
+            const angle = (normalizedIdx - progress) * sweep;
+            // Radius expands for larger logo
+            const navRadius = (logoBox.offsetWidth / 2) + (t * 140 + (1-t) * 60);
 
-            const radius = isMobile ? 0 : dynamicRadius;
-            const px = centerX + Math.cos(angleOffset) * radius;
-            const py = centerY + Math.sin(angleOffset) * radius;
+            const dx = logoX + Math.cos(angle * 0.8) * navRadius;
+            const dy = logoY + Math.sin(angle * 0.8) * navRadius;
+            const mx = (winW / 2) - (totalTabsWidth / 2) + (i * tabSpacing);
+            const my = logoY + (logoBox.offsetHeight / 2) + 60;
 
-            panel.style.left = `${px}px`;
-            panel.style.top = `${py}px`;
+            navBtns[i].style.left = `${t * dx + (1 - t) * mx}px`;
+            navBtns[i].style.top = `${t * dy + (1 - t) * my}px`;
+            navBtns[i].style.transform = `translate(-50%, -50%) scale(${1 + (t * (dist < 0.2 ? 0.25 : 0))})`;
 
-            if (!isMobile) {
-                const navRadius = (logoBox.width / 2) + 120;
-                const nx = centerX + Math.cos(angleOffset * 0.82) * navRadius;
-                const ny = centerY + Math.sin(angleOffset * 0.82) * navRadius;
-                navButtons[i].style.left = `${nx}px`;
-                navButtons[i].style.top = `${ny}px`;
-            }
-
-            const dist = Math.abs(angleOffset);
             if (dist < 0.2) {
-                panel.classList.add('active');
-                navButtons[i].classList.add('active');
+                panel.classList.add('active'); navBtns[i].classList.add('active');
             } else {
-                panel.classList.remove('active');
-                navButtons[i].classList.remove('active');
+                panel.classList.remove('active'); navBtns[i].classList.remove('active');
             }
-            panel.style.opacity = 1 - (dist * 2.8);
-            panel.style.transform = `translate(-50%, -50%) scale(${1 - (dist * 0.4)})`;
-        });
-
-        ctx.clearRect(0,0,canvas.width, canvas.height);
-        stars.forEach(s => {
-            ctx.globalAlpha = 0.2 + Math.abs(Math.sin(Date.now() * s.speed)) * 0.8;
-            ctx.fillStyle = s.speed > 0.0025 ? "#f472b6" : "#fff"; 
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
         });
 
         requestAnimationFrame(animate);
     }
 
     window.addEventListener('resize', initStars);
-    initStars(); animate();
-</script>
+    initStars(); drawStars(); animate();
 
+    document.addEventListener('keydown', e => {
+        if (e.key === "F12" || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || (e.ctrlKey && e.key === 'U')) {
+            e.preventDefault(); return false;
+        }
+    });
+</script>
 </body>
 </html>
