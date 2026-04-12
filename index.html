@@ -14,13 +14,9 @@
         }
         body {
             font-family: 'Inter', sans-serif;
-            background: 
-                radial-gradient(circle at 10% 20%, rgba(69, 20, 71, 0.5) 0%, transparent 50%),
-                radial-gradient(circle at 90% 80%, rgba(69, 20, 71, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at center, #16162d 0%, #0b0b1a 100%); 
+            background-color: #0b0b1a;
             color: #f8fafc;
             overflow-x: hidden; scrollbar-width: none; line-height: 1.6;
-            background-color: #0b0b1a;
         }
         body::-webkit-scrollbar { display: none; }
 
@@ -112,7 +108,7 @@
 <canvas id="starfield"></canvas>
 
 <div class="logo-container" id="logoBox">
-    <img src="cropped_circle_image (1).png" class="logo" />
+    <img src="cropped_circle_image (1).png" class="logo" alt="LowCode FX Logo" />
 </div>
 
 <nav class="curve-nav" id="curveNav"></nav>
@@ -130,8 +126,13 @@
             <h1>Products</h1>
             <h2>Our Stack</h2>
             <div class="product-item">
-                <h3>To Do App</h3>
+                <h3>Project Management App</h3>
                 <p style="font-size: 11px; color:#cbd5e1">Full-stack enterprise task management framework.</p>
+                <span style="display: block; font-size: 10px; color: #fff; margin-top: 12px; font-weight: 700; letter-spacing: 1px; opacity: 0.8;">AVAILABLE SOON</span>
+            </div>
+             <div class="product-item">
+                <h3>HR Portal</h3>
+                <p style="font-size: 11px; color:#cbd5e1">Resource Management Application</p>
                 <span style="display: block; font-size: 10px; color: #fff; margin-top: 12px; font-weight: 700; letter-spacing: 1px; opacity: 0.8;">AVAILABLE SOON</span>
             </div>
         </div></div>
@@ -140,7 +141,7 @@
             <h1>Contact</h1>
             <h2>Partnerships</h2>
             <p>Ready to build? Connect for enterprise architecture audits or custom builds.</p>
-            <a href="mailto:lowcodefx@gmail.com" style="color:#fff; font-weight:400; font-size:1.3rem; display:block; margin: 20px 0; text-decoration:none; letter-spacing: 1px;">lowcodefx@gmail.com</a>
+            <a href="mailto:lowcodefx@gmail.com" style="color:#fff; font-weight:400; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-size:1.3rem; display:block; margin: 20px 0; text-decoration:none; letter-spacing: 1px;">lowcodefx@gmail.com</a>
             <a href="https://www.youtube.com/@LowCodeFX" class="action-btn">YouTube Channel</a>
         </div></div>
     </div>
@@ -153,9 +154,13 @@
     const cursor = document.getElementById('custom-cursor');
     const follower = document.getElementById('cursor-follower');
     const logoBox = document.getElementById('logoBox');
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
     
     let mouseX = 0, mouseY = 0, cursorX = 0, cursorY = 0, followerX = 0, followerY = 0, currentScroll = 0;
+    let stars = [];
 
+    // --- CURSOR LOGIC ---
     window.addEventListener('mousemove', e => { 
         mouseX = e.clientX; mouseY = e.clientY; 
         const isHovering = e.target.closest('button, a, .product-item');
@@ -168,6 +173,7 @@
         }
     });
 
+    // --- NAVIGATION SETUP ---
     const labels = ["About", "Products", "Contact"];
     labels.forEach((label, i) => {
         const btn = document.createElement('button');
@@ -177,48 +183,83 @@
     });
     const navBtns = nav.querySelectorAll('button');
 
-    const canvas = document.getElementById('starfield');
-    const ctx = canvas.getContext('2d');
-    let stars = [], clouds = [];
-
+    // --- ATMOSPHERIC STARFIELD & NEBULA LOGIC ---
     function initStars() {
-        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        stars = Array.from({length: 250}, () => ({
-            x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-            size: Math.random() * 1.5, speedX: (Math.random() - 0.5) * 0.03, 
-            speedY: (Math.random() - 0.5) * 0.03, opacity: 0.3 + Math.random() * 0.5,
-            twinkleSpeed: 0.0004 + Math.random() * 0.0008 
-        }));
-        clouds = Array.from({length: 12}, () => ({
-            x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-            radius: (Math.random() * 600) + 300, color: Math.random() > 0.5 ? 'rgba(69, 20, 71,' : 'rgba(30, 30, 60,',
-            pulse: Math.random() * Math.PI, speed: 0.0005 + Math.random() * 0.001 
-        }));
+        canvas.width = window.innerWidth; 
+        canvas.height = window.innerHeight;
+        stars = [];
+        // Increased count and spread them significantly outside the bounds
+        for (let i = 0; i < 500; i++) {
+            stars.push({
+                x: (Math.random() - 0.5) * canvas.width * 5, 
+                y: (Math.random() - 0.5) * canvas.height * 5,
+                z: Math.random() * canvas.width,
+                size: Math.random() * 1.5,
+                color: Math.random() > 0.8 ? '#d8b4fe' : '#ffffff', 
+                isBlinking: Math.random() > 0.6,
+                blinkSpeed: 0.01 + Math.random() * 0.03,
+                blinkPhase: Math.random() * Math.PI
+            });
+        }
+    }
+
+    function drawNebula() {
+        ctx.fillStyle = "#0b0b1a";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const time = Date.now() * 0.0003;
+
+        // Nebula 1: Deep Purple Left
+        const grad1 = ctx.createRadialGradient(canvas.width * 0.2, canvas.height * 0.3, 0, canvas.width * 0.2, canvas.height * 0.3, canvas.width * 0.7);
+        grad1.addColorStop(0, 'rgba(69, 20, 71, 0.2)');
+        grad1.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad1;
+        ctx.fillRect(0,0, canvas.width, canvas.height);
+
+        // Nebula 2: Indigo Right
+        const grad2 = ctx.createRadialGradient(canvas.width * 0.8, canvas.height * 0.7, 0, canvas.width * 0.8, canvas.height * 0.7, canvas.width * 0.6);
+        grad2.addColorStop(0, 'rgba(22, 22, 45, 0.4)');
+        grad2.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad2;
+        ctx.fillRect(0,0, canvas.width, canvas.height);
     }
 
     function drawStars() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.globalCompositeOperation = 'screen';
-        clouds.forEach(cloud => {
-            cloud.pulse += cloud.speed;
-            const opacity = 0.06 + Math.sin(cloud.pulse) * 0.03;
-            const grad = ctx.createRadialGradient(cloud.x, cloud.y, 0, cloud.x, cloud.y, cloud.radius);
-            grad.addColorStop(0, `${cloud.color} ${opacity})`);
-            grad.addColorStop(1, `${cloud.color} 0)`);
-            ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cloud.x, cloud.y, cloud.radius, 0, Math.PI * 2); ctx.fill();
-        });
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = "#fff";
+        drawNebula();
+        
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
         stars.forEach(s => {
-            s.x += s.speedX; s.y += s.speedY;
-            if (s.x < 0) s.x = canvas.width; if (s.x > canvas.width) s.x = 0;
-            const twinkle = (Math.sin(Date.now() * s.twinkleSpeed) + 1) / 2;
-            ctx.globalAlpha = s.opacity + (twinkle * 0.1);
-            ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2); ctx.fill();
+            s.z -= 0.7; // Speed
+            if (s.z <= 0) s.z = canvas.width;
+
+            // Perspective math
+            const k = 128 / s.z;
+            const px = s.x * k + centerX;
+            const py = s.y * k + centerY;
+
+            if (px >= 0 && px <= canvas.width && py >= 0 && py <= canvas.height) {
+                const size = (1 - s.z / canvas.width) * 2.2;
+                let opacity = 0.8;
+                
+                if (s.isBlinking) {
+                    s.blinkPhase += s.blinkSpeed;
+                    opacity = 0.2 + (Math.sin(s.blinkPhase) + 1) * 0.4;
+                }
+
+                ctx.fillStyle = s.color;
+                ctx.globalAlpha = opacity;
+                ctx.beginPath();
+                ctx.arc(px, py, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
         });
+        ctx.globalAlpha = 1.0;
         requestAnimationFrame(drawStars);
     }
 
+    // --- MAIN ANIMATION LOOP ---
     function animate() {
         cursorX += (mouseX - cursorX) * 0.15; cursorY += (mouseY - cursorY) * 0.15;
         followerX += (mouseX - followerX) * 0.08; followerY += (mouseY - followerY) * 0.08;
@@ -234,8 +275,6 @@
 
         const t = Math.min(Math.max((winW - 500) / 1000, 0), 1);
 
-        // --- BIG LOGO LOGIC ---
-        // Wide: 22% from left, 55vh height | Mobile: Center, 25vh height
         const logoX = t * (winW * 0.22) + (1 - t) * (winW * 0.5);
         const logoY = t * (winH * 0.5) + (1 - t) * (winH * 0.2);
         const logoSize = t * 55 + (1 - t) * 25; 
@@ -262,7 +301,6 @@
 
             const sweep = Math.PI * 0.35;
             const angle = (normalizedIdx - progress) * sweep;
-            // Radius expands for larger logo
             const navRadius = (logoBox.offsetWidth / 2) + (t * 140 + (1-t) * 60);
 
             const dx = logoX + Math.cos(angle * 0.8) * navRadius;
@@ -285,7 +323,9 @@
     }
 
     window.addEventListener('resize', initStars);
-    initStars(); drawStars(); animate();
+    initStars(); 
+    drawStars(); 
+    animate();
 
     document.addEventListener('keydown', e => {
         if (e.key === "F12" || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || (e.ctrlKey && e.key === 'U')) {
